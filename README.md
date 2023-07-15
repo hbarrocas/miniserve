@@ -100,11 +100,11 @@ application.
 
 ## File structure
 
-__server/__  holds the server module that can run independently as explained
+- __server/__  holds the server module that can run independently as explained
 at the beginning of this file.
-__files/__ holds any files that Miniserve can serve upon a GET request.
-__tests/__ holds some test scripts. At the moment they're broken.
-__client.py__ is the only file part of the client library.
+- __files/__ holds any files that Miniserve can serve upon a GET request.
+- __tests/__ holds some test scripts. At the moment they're broken.
+- __client.py__ is the only file part of the client library.
 
 
 ## More Documentation
