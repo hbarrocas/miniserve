@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html {background:#eee;}
+  input,select,option,button {padding:0.8rem;background: #fefeda;border: 1px solid #ccc}
+  button,select{cursor:pointer;background:white;border-radius:0.3rem}
+  form {display:flex;flex-flow: column;align-items: start;gap: 1em}
+  .container {width:600px;margin: auto}
+  .row {padding:0.8rem;border-radius: 0.5rem; margin-bottom: 2px;}
+  .button-bar {display: flex}
+  .row,.field,.button-bar { width: 100% }
+  .field{display:flex;justify-content:space-between;}
+  .field label {display: block}
+  .toast{padding:0.8rem;border:1px solid #886;border-radius:0.3rem;background:#ffa}
+  .toast button{float:right;padding:0;background-color:transparent;border-width:0}
+  .alert{background:#f00;color:white;border-color:#800}
+  .white{background:white;color:black}
+  .green{background:#dfd;color:#030}
+  .hidden{display:none}
+  #message-board{position:fixed;top:0;left:0;right:0;padding:0.5rem;z-index:10}
+  #header{background:#ccc;padding:0.5rem;margin:0}
+  #list {margin:1rem auto;display: flex;flex-flow: column;gap: 2px}
+  #form-window{width:300px;margin:auto;background:#888;padding:1rem}
+  </style>
+  <script src="base.js"></script>
+  <script>
+
+    Object.assign(cx, {
+      listItem: function(item) {
+        return element('div').addClass('row', 'white').contains(
+          element('span').html(`${item.name} ${item.surname}`)
+        )
+      }
+    });
+
+    const readList = async (filter) => {
+      const structure = {
+        action: 'select',
+        data: {
+          rowid: true, name: true, surname: true
+        },
+        cond: {
+          name: {'_like': `${filter}%`}
+        }
+      };
+      const response = await fetch("http://localhost:9000/database/people", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(structure)
+      });
+      return await response.json();
+    }
+
+    const reloadList = () => {
+      const searchInput = document.getElementById('searchField');
+      searchInput?.dispatchEvent(new Event('input'));
+      searchInput?.focus();
+    }
+
+    const newItem = async (data) => {
+      const structure = {
+        action: 'insert',
+        data: data
+      };
+      const response = await fetch("http://localhost:9000/database/people", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(structure)
+      });
+      return await response.json();
+    }
+
+    const build = function() {
+      // Append the event handler to the search field
+      use('searchField').setProp({
+        oninput: async (event) => {
+          const resp = await readList(event.target.value);
+          const rows = resp.data;
+          if (rows.length > 0)
+            use('list').html('').contains(
+              ...rows.map((row) => cx.listItem(row))
+            );
+          else
+            use('list').html('').contains(
+              element('div').addClass('row').html('No results')
+            );
+        },
+      });
+      
+      use('form').setProp({
+        onsubmit: async (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.target);
+          const insertData = {
+            name: formData.get('name'),
+            surname: formData.get('surname')
+          };
+          const resp = await newItem(insertData);
+          alert(resp.status);
+          if (resp.status === 'Ok') {
+            event.target.reset();
+            use('form-window').addClass('hidden');
+            reloadList();
+          }
+        }
+      });
+
+      use('btn-new').setProp({
+        onclick: () => {
+          use('form-window').removeClass('hidden');
+          const form = document.getElementById('form');
+          form?.elements.name.focus();
+        }
+      });
+
+      use('btn-cancel').setProp({
+        onclick: (ev) => {
+          ev.target.form.reset();
+          use('form-window').addClass('hidden');
+          const searchInput = document.getElementById('searchField');
+          searchInput?.focus();
+        }
+      });
+
+      reloadList();
+    }
+
+  </script>
+ </head>
+ <body onload="build();">
+
+  <div id="message-board"></div>
+
+  <div id="header">
+    <div class="container">
+      <input
+          type="search"
+          id="searchField"
+          placeholder="Search" />
+      <button id="btn-new">+ New</button>
+    </div>
+  </div><!-- header -->
+
+  <div id="list" class="container"></div>
+
+  <div id="form-window" class="window hidden">
+    <form id="form">
+      <div class="field">
+        <input
+          name="name"
+          placeholder="Name"
+          pattern="^\w{2,}$"
+          title="Name must be a single word of at least two characters long"
+          required />
+      </div>
+      <div class="field">
+        <input
+          name="surname"
+          placeholder="Surname"
+          pattern="^\w{2,}$"
+          title="Surname must be a single word of at least two characters long"
+          required />
+      </div>
+      <div class="field">
+        <button id="btn-save">Save</button>
+        <button id="btn-cancel">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+ </body>
+</html>
