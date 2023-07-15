@@ -45,7 +45,7 @@
           name: {'_like': `${filter}%`}
         }
       };
-      const response = await fetch("http://localhost:9000/database/people", {
+      const response = await fetch("/database/people", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(structure)
@@ -64,7 +64,7 @@
         action: 'insert',
         data: data
       };
-      const response = await fetch("http://localhost:9000/database/people", {
+      const response = await fetch("/database/people", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(structure)
