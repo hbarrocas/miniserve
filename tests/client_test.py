@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     C = Client('localhost', 9000)
 
-    resp = C.query(insert_person('Heli', 'Barrocas'))
+    resp = C.query('people', insert_person('Heli', 'Barrocas'))
     if resp['status'] != 'Ok':
         print(f"Database error: {resp['status']}")
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         print(f"Successfully added row. New row ID = {resp['insertId']}")
 
     filter = {}
-    list = list_people(filter)
+    list = C.query('people', list_people(filter))
 
     if list['status'] == 'Ok':
         data = list['data']
