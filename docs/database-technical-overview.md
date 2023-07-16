@@ -27,9 +27,9 @@ a table on the server database, called 'tasks'.
 * The server receives this message, unpacks the JSON string back into
 the original structure and decodes its parts
 
-** `action = "insert"` tells the interpreter it is an INSERT query
+  * `action = "insert"` tells the interpreter it is an INSERT query
 
-** the `data = {...}` contains a dictionary, where each key is a field
+  * the `data = {...}` contains a dictionary, where each key is a field
 on that table, and the corresponding values are, in this case, values
 to be inserted on that table.
 
@@ -41,7 +41,7 @@ INSERT INTO tasks (title, completed, priority) VALUES (?, ?, ?)
 Note that the SQL statements generated here, use interrogation symbols
 instead of the actual data. While it's doable, generating the statement
 with the data is more complicated, due to the different possible types
-and, sqlite3 can process prepared statements which take care of field
+and, sqlite3 can process _prepared statements_ which take care of field
 data types, invalid characters and SQL injection.
 
 The function that generates this statement returns a tuple with the
@@ -178,10 +178,10 @@ its presence and not its value.
 }
 ```
 
-With no condition defined, the SELECT statement will just return all elements
-of the list.
+With no condition defined, the SELECT statement will just return **all elements
+of the list**.
 
-__A WORD OF WARNING:__ This is also valid for __DELETE__ statements: with 
-__no conditional attributes__, the DELETE query __will delete all values 
-from the table__.
+**A WORD OF WARNING:** This is also valid for **DELETE** statements: with 
+**no conditional attributes**, the DELETE query **will delete all values 
+from the table**.
 
