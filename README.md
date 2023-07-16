@@ -109,4 +109,4 @@ at the beginning of this file.
 
 ## More Documentation
 
-More documentation is on its way. In short I'll have an API reference.
+Check out the technical [documentation](docs/database-technical-overview.md)
