@@ -2,13 +2,14 @@ import sqlite3
 import query as q
 
 
-def execute(table: str, data: dict) -> dict:
+def row_factory(cursor, row):
+    d = {}
+    for i, col in enumerate(cursor.description):
+        d[col[0]] = row[i]
+    return d
 
-    def row_factory(cursor, row):
-        d = {}
-        for i, col in enumerate(cursor.description):
-            d[col[0]] = row[i]
-        return d
+
+def execute(table: str, data: dict) -> dict:
 
     response = {
         'status': 'Ok',
@@ -25,6 +26,10 @@ def execute(table: str, data: dict) -> dict:
 
         action = data['action']
         cond = data['cond'] if 'cond' in data else {}
+        order = data['order'] if 'order' in data else {}
+        limit = data['limit'] if 'limit' in data else False
+        offset = data['offset'] if 'offset' in data else 0
+        page = (limit, offset) if limit is not False else False
 
         if 'data' not in data and action != 'delete':
             raise Exception('data field is required for this operation')
@@ -36,7 +41,7 @@ def execute(table: str, data: dict) -> dict:
         elif action == 'update':
             query, values = q.update(table, fields, cond)
         elif action == 'select':
-            query, values = q.select(table, fields, cond)
+            query, values = q.select(table, fields, cond, order, page)
         elif action == 'delete':
             query, values = q.delete(table, cond)
         else:
