@@ -44,7 +44,36 @@ def _where(cond: dict) -> str:
     return f'WHERE {conds}'
 
 
-def select(table: str, data: dict, cond: dict) -> (str, list):
+def _order_dir(dir: str) -> str:
+    map_ord = {
+        '_asc': 'ASC',
+        '_desc': 'DESC'
+    }
+    if dir not in map_ord:
+        raise Exception('Sorting order can only be _asc or _desc')
+    return map_ord[dir]
+
+
+def _order_by(order: dict) -> str:
+    ord = ", ".join([
+        f'{field} {_order_dir(dir)}' for field, dir in order.items()
+    ])
+    return f'ORDER BY {ord}'
+
+
+def _limit(page: tuple[int, int]) -> str:
+    limit, offset = page
+    lim = f'{offset}, {limit}' if offset > 0 else f'{limit}'
+    return f'LIMIT {lim}'
+
+
+def select(
+    table: str,
+    data: dict,
+    cond: dict,
+    order: dict,
+    page: tuple[int, int]
+) -> (str, list):
     _validate_table(table)
     fields = _fields_name(data) if len(data) > 0 else '*'
     query_data = []
@@ -53,6 +82,10 @@ def select(table: str, data: dict, cond: dict) -> (str, list):
     if len(cond) > 0:
         query_blocks.append(_where(cond))
         query_data.extend(_conds_value(cond))
+    if len(order) > 0:
+        query_blocks.append(_order_by(order))
+    if page is not False:
+        query_blocks.append(_limit(page))
 
     query = " ".join(query_blocks)
     return (query, query_data)

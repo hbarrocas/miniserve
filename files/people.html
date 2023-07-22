@@ -43,7 +43,9 @@
         },
         cond: {
           name: {'_like': `${filter}%`}
-        }
+        },
+        order: {'name': '_asc'},
+        limit: 20,
       };
       const response = await fetch("/database/people", {
         method: 'POST',
@@ -72,6 +74,10 @@
       return await response.json();
     }
 
+    const message = (msg) => {
+      use().contains(cx.toast(msg));
+    }
+
     const build = function() {
       // Append the event handler to the search field
       use('searchField').setProp({
@@ -86,6 +92,7 @@
             use('list').html('').contains(
               element('div').addClass('row').html('No results')
             );
+          if (resp.status != 'Ok') message(resp.status);
         },
       });
       
@@ -104,6 +111,7 @@
             use('form-window').addClass('hidden');
             reloadList();
           }
+          else message(resp.status);      
         }
       });
 

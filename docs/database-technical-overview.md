@@ -185,3 +185,24 @@ of the list**.
 **no conditional attributes**, the DELETE query **will delete all values 
 from the table**.
 
+The select function also will generate a statement with LIMIT and ORDER directives
+if coded as follows:
+
+```
+{
+  "action": "select",
+  "data": {},
+  "order": {title: "_asc"},
+  "limit": 20,
+  "offset": 0
+}
+```
+This would correspond to the below SQL query:
+
+```
+SELECT * FROM tasks ORDER title ASC, LIMIT 0, 20;
+```
+
+The offset attribute is ignored if there's no limit attribute. The order attribute
+is an object with table fields as keys. Only the values `_asc` or `_desc` will
+be allowed for each field. 
