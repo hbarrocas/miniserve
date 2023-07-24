@@ -1,0 +1,135 @@
+#!/bin/bash
+
+# Detect script's residing directory
+DIR_SCRIPT=$( cd "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )
+
+SRC_ROOT="${DIR_SCRIPT}"
+DB_SCRIPT="default.sql"
+DB_CURRENT="data.db"
+DB_BACKUP_DIR="backup"
+
+function log_msg {
+  echo -ne ":: ${1}"
+}
+
+
+function log_success {
+  echo "Success"
+}
+
+
+function log_failiure {
+  echo "Failed"
+}
+
+
+function log_error {
+  echo -ne "!! ${1}" >&2
+}
+
+
+function abort {
+  echo " Aborting..." >&2
+  exit $1
+}
+
+
+function db_backup {
+  if [ ! -f "${SRC_ROOT}/${DB_CURRENT}" ]; then
+    log_msg "No database file to backup. Skipping\n"
+    return
+  fi
+  
+  mkdir -p ${SRC_ROOT}/${DB_BACKUP_DIR}
+  if [ ! "$?" = "0" ]; then
+    log_error "Could not create backup directory ${DB_BACKUP_DIR}."
+    abort 2
+  fi
+
+  DST_BACKUP="${SRC_ROOT}/${DB_BACKUP_DIR}"
+  cp "${SRC_ROOT}/${DB_CURRENT}" "${DST_BACKUP}/${DB_CURRENT}-$(date +%Y%m%d-%H%M%S)"
+  if [ ! "$?" = "0" ]; then
+    log_error "Could not backup current database."
+    abort 2
+  fi
+
+  BACKUP_SIZE=$(du -ch "${DST_BACKUP}" | sed -E -e '/total/!d' -e s'/^(\w+).*/\1/')
+  log_msg "Database backed up. Backup directory size is ${BACKUP_SIZE}\n"
+}
+
+
+function db_reset {
+  if [ ! -f "${SRC_ROOT}/${DB_SCRIPT}" ]; then
+    log_error "No ${DB_SCRIPT} file found -\n"
+    log_error "  A ${DB_SCRIPT} file with default schema and values is required to initialise a new database."
+    abort 1
+  fi
+
+  db_backup
+  [ -f "${SRC_ROOT}/${DB_CURRENT}" ] && rm "${SRC_ROOT}/${DB_CURRENT}"
+
+  log_msg "Creating factory default database... "
+  cat "${SRC_ROOT}/${DB_SCRIPT}" | sqlite3 ${SRC_ROOT}/${DB_CURRENT} \
+    && log_success || log_failiure
+}
+
+
+function srv_create {
+  NEW_ROOT="$1"
+  if [ -x "${NEW_ROOT}" ]; then
+    log_error "a file or directory named ${NEW_ROOT} already exists."
+    abort 2
+  fi
+
+  log_msg "Creating server directory ${NEW_ROOT}... "
+  mkdir -p "${NEW_ROOT}"
+  if [ ! "$?" = "0" ]; then
+    log_error "\nCould not create new server directory ${NEW_ROOT}"
+    abort 1
+  else
+    log_success
+  fi
+
+  mkdir "${NEW_ROOT}/files" \
+    && echo "   + /files"
+  cp ${SRC_ROOT}/miniserve "${NEW_ROOT}" \
+    && echo "   + /miniserve script"
+  cp ${SRC_ROOT}/${DB_SCRIPT} "${NEW_ROOT}/${DB_SCRIPT}-sample" \
+    && echo "   + /${DB_SCRIPT}-sample"
+
+  log_success
+}
+
+
+log_msg "Miniserve Admin tool --\n"
+
+while getopts "brc:" ACTION; do
+  case $ACTION in
+    b)
+      db_backup
+      exit 0
+      ;;
+    r)
+      db_reset
+      exit 0
+      ;;
+    c)
+      srv_create $OPTARG
+      exit 0
+      ;;
+    *)
+      log_error "Unrecognised option\n"
+      ;;
+  esac
+done
+
+cat << "END"
+
+Usage: miniserve -b|-r|-c <name>
+
+-b          Backup current database
+-r          Reset to "factory settings"
+-c <name>   Create a server directory named <name> with
+            the minimum required structure
+
+END
