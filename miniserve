@@ -101,10 +101,19 @@ function srv_create {
 }
 
 
+function srv_run {
+  PYTHONPATH=${DIR_SCRIPT}:${PYTHONPATH}
+  /usr/bin/env python3 -m miniserve.server -r ${DIR_SCRIPT}
+}
+
 log_msg "Miniserve Admin tool --\n"
 
-while getopts "brc:" ACTION; do
+while getopts "bdrc:" ACTION; do
   case $ACTION in
+    d)
+      srv_run
+      exit 0
+      ;;
     b)
       db_backup
       exit 0
