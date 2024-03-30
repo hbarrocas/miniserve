@@ -101,15 +101,24 @@ function srv_create {
 }
 
 
+function srv_run {
+  PYTHONPATH=${DIR_SCRIPT}:${PYTHONPATH}
+  /usr/bin/env python3 -m miniserve.server -r ${DIR_SCRIPT}
+}
+
 log_msg "Miniserve Admin tool --\n"
 
-while getopts "brc:" ACTION; do
+while getopts "bdrc:" ACTION; do
   case $ACTION in
+    r)
+      srv_run
+      exit 0
+      ;;
     b)
       db_backup
       exit 0
       ;;
-    r)
+    f)
       db_reset
       exit 0
       ;;
@@ -125,11 +134,12 @@ done
 
 cat << "END"
 
-Usage: miniserve -b|-r|-c <name>
+Usage: miniserve -r|-b|-f|[-c <name>]
 
+-r          Run the server
 -b          Backup current database
 -r          Reset to "factory settings"
--c <name>   Create a server directory named <name> with
+-c <name>   Create a new project named <name> with
             the minimum required structure
 
 END
