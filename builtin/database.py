@@ -1,5 +1,5 @@
 import sqlite3
-import query as q
+import miniserve.builtin.query as q
 
 
 def row_factory(cursor, row):
