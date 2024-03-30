@@ -16,11 +16,11 @@ would be needed in minutes and security is not a concern.
 
 Before running for the first time, create a sqlite3 database to serve.
 
-The `reset.sh` script and the `default.sql` file have been added for
-your convenience. Running `reset.sh` will create a new file `data.db`
-in the root directory of Miniserve. This, for the time being, is
-the only database the server will handle. Future versions may add
-functionality to serve different databases based on the application.
+The `miniserve` script and the `default.sql` file have been added for
+your convenience. Running `miniserve` will show a help message with all
+the available options. These include creating a new miniserve project,
+running the current project's server, resetting the project and creating
+backups of the database.
 
 ## Running the server
 
