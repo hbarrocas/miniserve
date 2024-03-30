@@ -108,7 +108,7 @@ function srv_run {
 
 log_msg "Miniserve Admin tool --\n"
 
-while getopts "bdrc:" ACTION; do
+while getopts "rbfc:" ACTION; do
   case $ACTION in
     r)
       srv_run
@@ -138,7 +138,7 @@ Usage: miniserve -r|-b|-f|[-c <name>]
 
 -r          Run the server
 -b          Backup current database
--r          Reset to "factory settings"
+-f          Reset to "factory settings"
 -c <name>   Create a new project named <name> with
             the minimum required structure
 
