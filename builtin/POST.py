@@ -5,11 +5,17 @@ import miniserve.builtin.database as db
 def database(server):
     args = server.url.path.split('/')[1:]
     if len(args) < 2:
+        server.send_response(400, 'database: missing database name')
+        server.end_headers()
+        return
+
+    if len(args) < 3:
         server.send_response(400, 'database: missing table name')
         server.end_headers()
         return
 
-    table = args[1]
+    db_name = args[1]
+    table = args[2]
     size = int(server.headers.get('Content-Length'))
     data = server.rfile.read(size)
     try:
@@ -19,7 +25,7 @@ def database(server):
         server.end_headers()
         return
 
-    output = json.dumps(db.execute(table, input))
+    output = json.dumps(db.execute(db_name, table, input))
 
     headers = {
         'Content-Type': 'application/json',

@@ -9,7 +9,7 @@ def row_factory(cursor, row):
     return d
 
 
-def execute(table: str, data: dict) -> dict:
+def execute(database: str, table: str, data: dict) -> dict:
 
     response = {
         'status': 'Ok',
@@ -47,7 +47,7 @@ def execute(table: str, data: dict) -> dict:
         else:
             raise Exception(f'Unknown action {action}')
 
-        conn = sqlite3.connect('data.db')
+        conn = sqlite3.connect(f'{database}.db')
         conn.row_factory = row_factory
         c = conn.cursor()
 
